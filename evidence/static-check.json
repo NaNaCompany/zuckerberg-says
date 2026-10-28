@@ -1,0 +1,21 @@
+{
+  "status": "passed",
+  "slug": "zuckerberg-says",
+  "posts": 1681,
+  "html_pages": 3144,
+  "month_pages": 191,
+  "day_pages": 1269,
+  "source_rows_matched": true,
+  "four_tags_every_html": true,
+  "gtm_noscript_every_html": true,
+  "clock_times_not_invented": true,
+  "exact_x_ids_and_times": true,
+  "monthly_sample_correct": true,
+  "day_lists_complete_for_collected_data": true,
+  "canonical_and_local_links": true,
+  "source_bodies_redistributed": false,
+  "source_dates": [
+    "2004-02-15",
+    "2026-07-04"
+  ]
+}

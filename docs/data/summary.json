@@ -1,0 +1,66 @@
+{
+  "slug": "zuckerberg-says",
+  "captured_at": "2026-10-28T13:33:11.064437+00:00",
+  "coverage": "partial",
+  "records": 1681,
+  "first": "2004-02-15",
+  "last": "2026-07-04",
+  "exact_time": 0,
+  "sources": [
+    {
+      "id": "zuckerberg-files",
+      "url": "https://epublications.marquette.edu/zuckerberg_files_transcripts/",
+      "creator": "The Zuckerberg Files / Marquette University",
+      "redistributed_fields": [
+        "publication_date",
+        "source_url",
+        "record_identity"
+      ],
+      "transcripts": "Not downloaded or redistributed",
+      "timestamp_policy": "Calendar date only; no clock time invented"
+    }
+  ],
+  "post_body_policy": "No scraped bodies, images or third-party summaries redistributed. Only factual post identities, dates and original permalinks; post content is displayed through official platform embeds.",
+  "excluded_records": [
+    {
+      "id": "archive-1229",
+      "url": "https://twitter.com/teddyschleifer/status/1271265329411289090",
+      "reason": "Original X post belongs to a different person."
+    },
+    {
+      "id": "archive-46",
+      "url": "https://blog.facebook.com/blog.php?post=10150378701937131",
+      "reason": "Not a supported original social-post host; third-party news or retired corporate blog."
+    },
+    {
+      "id": "archive-55",
+      "url": "https://www.insidefacebook.com/2010/06/22/exclusive-discussing-the-future-of-facebook-and-the-facebook-ecosystem-with-ceo-mark-zuckerberg/",
+      "reason": "Not a supported original social-post host; third-party news or retired corporate blog."
+    },
+    {
+      "id": "archive-29",
+      "url": "https://allfacebook.com/bret-taylor-becomes-facebooks-cto_b14814",
+      "reason": "Not a supported original social-post host; third-party news or retired corporate blog."
+    },
+    {
+      "id": "archive-23",
+      "url": "https://blog.facebook.com/blog.php?post=190423927130",
+      "reason": "Not a supported original social-post host; third-party news or retired corporate blog."
+    },
+    {
+      "id": "archive-19",
+      "url": "https://blog.facebook.com/blog.php?post=54434097130",
+      "reason": "Not a supported original social-post host; third-party news or retired corporate blog."
+    }
+  ],
+  "subject": "Mark Zuckerberg",
+  "account": "zuck",
+  "platform_counts": {
+    "facebook": 1382,
+    "threads": 134,
+    "instagram": 165
+  },
+  "days": 1269,
+  "months": 191,
+  "content_mode": "official_embeds"
+}

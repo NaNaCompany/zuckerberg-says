@@ -1,0 +1,9 @@
+{
+  "status": "passed",
+  "tests": 13,
+  "type": "Node VM browser API mocks plus publisher initialization tests",
+  "browser_native_clipboard_readback": false,
+  "browser_native_share_delivery": false,
+  "archive_sha256": "0056f0f7acf03bb9c299093c71c24cf4ef73db2b651ed43b6451a15f701d0c3b",
+  "home_title_checked": true
+}
