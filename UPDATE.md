@@ -26,3 +26,7 @@
 
 - Move the floating Archive button to the right middle of the viewport (40% from the top). On mobile, keep the archive panel controls below top anchors and above expanded bottom anchors. An expanded production advertisement had intercepted the previous bottom button. Publisher integrations and ad settings remain unchanged.
 - Verified locally at 375 × 812: visible menu open/close, month navigation, lazy archive menu and shuffled 50-card content. Only the shared stylesheet and this record changed; source data, generated HTML and the tested feed runtime remain unchanged. Production verification is recorded separately.
+
+## 2026-10-29 · Cache-aware navigation stylesheet release
+
+- Refresh the static asset version in every generated HTML page so existing browser caches request the corrected navigation stylesheet immediately after the new page is served. Python builds already derive this version from the asset hash; Trump build sources now use the new CSS release version. Every changed HTML byte is accounted for by the exact old-to-new version replacement. No post contents or sitemap URLs changed.
