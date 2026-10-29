@@ -2,3 +2,5 @@ __pycache__/
 evidence/browser-*.png
 evidence/release.json
 evidence/live-check.json
+evidence/feed-*.log
+.cache/

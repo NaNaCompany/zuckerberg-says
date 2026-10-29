@@ -1,0 +1,255 @@
+{
+  "status": "passed",
+  "slug": "zuckerberg-says",
+  "processed_at": "2026-10-29T00:35:39Z",
+  "records": 1681,
+  "known_like_counts": 0,
+  "unavailable_like_counts": 1681,
+  "observed_zero_counts": 0,
+  "old_posts_sha256": "a842b8942a018640dba976327808b849dac60c50a5f7381699d2465668fd1dce",
+  "preserved_fields": "Every original field, record ID, publication date, timestamp, source ID and original URL preserved; only like_count, likes_captured_at and likes_source added.",
+  "unavailable_policy": "Unknown, missing, rounded-only, inaccessible or author/ID-mismatched counts are null, never fabricated as zero.",
+  "text_policy": "No scraped bodies, translations, media or third-party summaries added to the post corpus.",
+  "source": {
+    "url": "https://epublications.marquette.edu/zuckerberg_files_transcripts/",
+    "field": null,
+    "limitation": "Archived records retain IDs/dates/permalinks but no exact like metric. Facebook aggregate reaction counts are not reclassified as likes."
+  },
+  "failures": [],
+  "public_source_attempts": [
+    {
+      "id": "archive-2263",
+      "platform": "facebook",
+      "original_url": "https://www.facebook.com/zuck/posts/pfbid0wEQ63CRyHF1GQ5dSG5hLLVmqAWTFSGkjpdJV3RCDVKHBCytfgetpkJKG68otCSeGl",
+      "requested_url": "https://www.facebook.com/plugins/post.php?href=https%3A%2F%2Fwww.facebook.com%2Fzuck%2Fposts%2Fpfbid0wEQ63CRyHF1GQ5dSG5hLLVmqAWTFSGkjpdJV3RCDVKHBCytfgetpkJKG68otCSeGl&show_text=true&width=500",
+      "captured_at": "2026-10-29T00:35:24.193649+00:00",
+      "count_retained": false,
+      "status": 200,
+      "final_url": "https://www.facebook.com/plugins/post.php?href=https%3A%2F%2Fwww.facebook.com%2Fzuck%2Fposts%2Fpfbid0wEQ63CRyHF1GQ5dSG5hLLVmqAWTFSGkjpdJV3RCDVKHBCytfgetpkJKG68otCSeGl&show_text=true&width=500",
+      "bytes": 73501,
+      "raw_sha256": "09ff8355ef8bf21eb7fb98b97850f843bf17ae14e5309f975c29204a982d4a60",
+      "potential_fields": [],
+      "reason": "No exact like field bound to this original post could be verified. Login/availability pages and aggregate reaction counts are not used."
+    },
+    {
+      "id": "archive-2041",
+      "platform": "instagram",
+      "original_url": "https://www.instagram.com/p/C-BjBBpMjk7/",
+      "requested_url": "https://www.instagram.com/p/C-BjBBpMjk7/",
+      "captured_at": "2026-10-29T00:35:24.193649+00:00",
+      "count_retained": false,
+      "status": 200,
+      "final_url": "https://www.instagram.com/p/C-BjBBpMjk7/",
+      "bytes": 546535,
+      "raw_sha256": "e85c4e00ecb43acaf30f6d6eb2d4a5b3cdc26d4fe56e30739da789361ac9c45d",
+      "potential_fields": [],
+      "reason": "No exact like field bound to this original post could be verified. Login/availability pages and aggregate reaction counts are not used."
+    },
+    {
+      "id": "archive-2222",
+      "platform": "threads",
+      "original_url": "https://www.threads.com/@zuck/post/DSVRshjkbtK",
+      "requested_url": "https://www.threads.com/@zuck/post/DSVRshjkbtK",
+      "captured_at": "2026-10-29T00:35:24.193649+00:00",
+      "count_retained": false,
+      "status": 200,
+      "final_url": "https://www.threads.com/@zuck/post/DSVRshjkbtK",
+      "bytes": 594094,
+      "raw_sha256": "749bb0a5a8ed9db0ecea9fb26e346594a0aef7ccbc211d66ed8d8c396d69cc43",
+      "potential_fields": [],
+      "reason": "No exact like field bound to this original post could be verified. Login/availability pages and aggregate reaction counts are not used."
+    }
+  ],
+  "raw_archive_exact_like_fields": 0,
+  "rounded_instagram_count_excluded": "The public OG description displayed 423K likes, which is rounded rather than an exact integer; not expanded to 423000.",
+  "additional_facebook_iframe_checks": [
+    {
+      "id": "archive-2257",
+      "original_url": "https://www.facebook.com/zuck/posts/pfbid0jj1A6shJfWbEhfA6qRFDttkzm4owAJdhAuxEFYom9q9PN8CqcN4WeMGSuXkHLPJJl",
+      "published_date": "2026-06-23",
+      "requested_url": "https://www.facebook.com/plugins/post.php?href=https%3A%2F%2Fwww.facebook.com%2Fzuck%2Fposts%2Fpfbid0jj1A6shJfWbEhfA6qRFDttkzm4owAJdhAuxEFYom9q9PN8CqcN4WeMGSuXkHLPJJl&show_text=true&width=500",
+      "captured_at": "2026-10-29T00:43:07.532837+00:00",
+      "count_retained": false,
+      "status": 200,
+      "final_url": "https://www.facebook.com/plugins/post.php?href=https%3A%2F%2Fwww.facebook.com%2Fzuck%2Fposts%2Fpfbid0jj1A6shJfWbEhfA6qRFDttkzm4owAJdhAuxEFYom9q9PN8CqcN4WeMGSuXkHLPJJl&show_text=true&width=500",
+      "bytes": 231289,
+      "raw_sha256": "d76dc9da4e5a4b1b44981f9db3e3cdf4bec132d710f516d6d127fd730b8f5f34",
+      "original_identity_present": true,
+      "field_occurrences": {
+        "reaction_count": 0,
+        "like_count": 0,
+        "userInteractionCount": 25
+      },
+      "exact_candidates": [
+        {
+          "field": "userInteractionCount",
+          "value": 616
+        },
+        {
+          "field": "userInteractionCount",
+          "value": 2184
+        },
+        {
+          "field": "userInteractionCount",
+          "value": 161
+        },
+        {
+          "field": "userInteractionCount",
+          "value": 121468831
+        },
+        {
+          "field": "userInteractionCount",
+          "value": 121468831
+        },
+        {
+          "field": "userInteractionCount",
+          "value": 267
+        },
+        {
+          "field": "userInteractionCount",
+          "value": 1839
+        },
+        {
+          "field": "userInteractionCount",
+          "value": 42
+        },
+        {
+          "field": "userInteractionCount",
+          "value": 121468831
+        },
+        {
+          "field": "userInteractionCount",
+          "value": 121468831
+        },
+        {
+          "field": "userInteractionCount",
+          "value": 7289
+        },
+        {
+          "field": "userInteractionCount",
+          "value": 73233
+        },
+        {
+          "field": "userInteractionCount",
+          "value": 1500
+        },
+        {
+          "field": "userInteractionCount",
+          "value": 121468831
+        },
+        {
+          "field": "userInteractionCount",
+          "value": 121468831
+        },
+        {
+          "field": "userInteractionCount",
+          "value": 887
+        },
+        {
+          "field": "userInteractionCount",
+          "value": 5441
+        },
+        {
+          "field": "userInteractionCount",
+          "value": 149
+        },
+        {
+          "field": "userInteractionCount",
+          "value": 121468831
+        },
+        {
+          "field": "userInteractionCount",
+          "value": 121468831
+        },
+        {
+          "field": "userInteractionCount",
+          "value": 2837
+        },
+        {
+          "field": "userInteractionCount",
+          "value": 25296
+        },
+        {
+          "field": "userInteractionCount",
+          "value": 687
+        },
+        {
+          "field": "userInteractionCount",
+          "value": 121468831
+        },
+        {
+          "field": "userInteractionCount",
+          "value": 121468831
+        }
+      ],
+      "reason": "Numeric candidates require source identity and metric semantics verification before retaining."
+    },
+    {
+      "id": "archive-1467",
+      "original_url": "https://www.facebook.com/zuck/posts/10114030672641351",
+      "published_date": "2021-10-29",
+      "requested_url": "https://www.facebook.com/plugins/post.php?href=https%3A%2F%2Fwww.facebook.com%2Fzuck%2Fposts%2F10114030672641351&show_text=true&width=500",
+      "captured_at": "2026-10-29T00:43:07.532837+00:00",
+      "count_retained": false,
+      "status": 200,
+      "final_url": "https://www.facebook.com/plugins/post.php?href=https%3A%2F%2Fwww.facebook.com%2Fzuck%2Fposts%2F10114030672641351&show_text=true&width=500",
+      "bytes": 92483,
+      "raw_sha256": "e8cf065cc630398c9bf503c0d20ade4269930481354c26392f987d6b5c15b3d9",
+      "original_identity_present": true,
+      "field_occurrences": {
+        "reaction_count": 0,
+        "like_count": 0,
+        "userInteractionCount": 0
+      },
+      "exact_candidates": [],
+      "reason": "No exact post-bound numeric like/reaction metric in public iframe HTML. No authentication, runtime graph endpoint or challenge bypass attempted."
+    },
+    {
+      "id": "archive-772",
+      "original_url": "https://www.facebook.com/zuck/posts/10104110665105971",
+      "published_date": "2017-10-17",
+      "requested_url": "https://www.facebook.com/plugins/post.php?href=https%3A%2F%2Fwww.facebook.com%2Fzuck%2Fposts%2F10104110665105971&show_text=true&width=500",
+      "captured_at": "2026-10-29T00:43:07.533837+00:00",
+      "count_retained": false,
+      "status": 200,
+      "final_url": "https://www.facebook.com/plugins/post.php?href=https%3A%2F%2Fwww.facebook.com%2Fzuck%2Fposts%2F10104110665105971&show_text=true&width=500",
+      "bytes": 73596,
+      "raw_sha256": "21b5d5d23d1169345566b83a684b9fe87151e2ab489fd483f98b9dda8c7635ef",
+      "original_identity_present": true,
+      "field_occurrences": {
+        "reaction_count": 0,
+        "like_count": 0,
+        "userInteractionCount": 0
+      },
+      "exact_candidates": [],
+      "reason": "No exact post-bound numeric like/reaction metric in public iframe HTML. No authentication, runtime graph endpoint or challenge bypass attempted."
+    },
+    {
+      "id": "archive-293",
+      "original_url": "https://www.facebook.com/4/posts/10100113417552111/",
+      "published_date": "2004-09-05",
+      "requested_url": "https://www.facebook.com/plugins/post.php?href=https%3A%2F%2Fwww.facebook.com%2F4%2Fposts%2F10100113417552111%2F&show_text=true&width=500",
+      "captured_at": "2026-10-29T00:43:07.533837+00:00",
+      "count_retained": false,
+      "status": 200,
+      "final_url": "https://www.facebook.com/plugins/post.php?href=https%3A%2F%2Fwww.facebook.com%2F4%2Fposts%2F10100113417552111%2F&show_text=true&width=500",
+      "bytes": 91441,
+      "raw_sha256": "37b857fb4c1b6110cfe8c5bc12266d2d3732d3c220b5cd300d373490492f1715",
+      "original_identity_present": true,
+      "field_occurrences": {
+        "reaction_count": 0,
+        "like_count": 0,
+        "userInteractionCount": 0
+      },
+      "exact_candidates": [],
+      "reason": "No exact post-bound numeric like/reaction metric in public iframe HTML. No authentication, runtime graph endpoint or challenge bypass attempted."
+    }
+  ],
+  "limited_followup_policy": "Five original Facebook iframe pages total checked (one initial plus four follow-up). No exact post-bound metric could be verified. Stop without repeated or bulk collection.",
+  "additional_facebook_iframe_result": {
+    "pages_checked_total": 5,
+    "exact_archive_permalink_matches": 0,
+    "counts_added": 0,
+    "reason": "One iframe response included LikeAction numeric metadata for different numeric post permalinks, with conflicting counts for a repeated identifier. None exactly matched an existing archive permalink. The requested pfbid appeared only as an input reference; no verified alias mapping. Exclude unrelated and ambiguous counts."
+  }
+}

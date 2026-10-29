@@ -2,6 +2,7 @@ from collections import Counter,defaultdict
 from pathlib import Path
 from urllib.parse import urlsplit
 import calendar,hashlib,html,json,random,re,shutil
+from home_feed import make as make_home_feed, record as feed_record, config as feed_config, panel as feed_panel, eligible as feed_eligible
 
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'docs';APP=json.loads((ROOT/'APP.json').read_text(encoding='utf-8'))
@@ -17,8 +18,9 @@ FALLBACK=re.search(r'export const FALLBACK=`(.*?)`;',tracking,re.S)[1]
 for k,v in {'ga':'G-2ZYSF0173P','gtm':'GTM-NV2WWQXB','ads':'ca-pub-9767176956440077','cf':'9f3423bb0d034d91bbe1a12afeff2429'}.items():
     HEAD=HEAD.replace('${IDS.'+k+'}',v);FALLBACK=FALLBACK.replace('${IDS.'+k+'}',v)
 assert '${' not in HEAD+FALLBACK
-ASSET=hashlib.sha256((ROOT/'src/archive.js').read_bytes()+(ROOT/'src/series.css').read_bytes()).hexdigest()[:12]
+ASSET=hashlib.sha256((ROOT/'src/archive.js').read_bytes()+(ROOT/'src/series.css').read_bytes()+(ROOT/'src/feed.js').read_bytes()+(ROOT/'src/feed.css').read_bytes()).hexdigest()[:12]
 URLS=[]
+FEED_PANEL=''
 
 def safe_original(row):
     u=urlsplit(row['original_url']);host=(u.hostname or '').lower()
@@ -36,24 +38,24 @@ def site_page(title,content,relative,kind='browse',config=None):
     url=ORIGIN+'/'+relative
     payload={'kind':kind,'origin':ORIGIN,'base':PREFIX,'name':NAME,**(config or {})}
     payload_json=json.dumps(payload,ensure_ascii=False,separators=(',',':')).replace('<','\\u003c')
-    header=f'<a class="skip" href="#main">Skip to content</a><header class="topbar"><a class="wordmark" href="{PREFIX}">{H(APP["wordmark"])}<span>SAYS</span><b aria-hidden="true">.</b></a><nav aria-label="Pages"><a href="{PREFIX}#archive">Archive</a><a href="{PREFIX}sources.html">Sources & coverage</a></nav></header>'
+    header=f'<a class="skip" href="#main">Skip to content</a><header class="topbar"><a class="wordmark" href="{PREFIX}">{H(APP["wordmark"])}<span>SAYS</span><b aria-hidden="true">.</b></a><nav aria-label="Pages"><a href="{PREFIX}archive-menu.html" data-feed-action="archive-open">Archive</a><a href="{PREFIX}sources.html">Sources & coverage</a></nav></header>'
     footer=f'<footer><span>Independent archive · Partial coverage</span><a href="{PREFIX}sources.html">Sources & coverage</a><a href="{PREFIX}privacy.html">Privacy</a><a class="more" href="https://nanalab.kr/apps/">More Apps</a></footer>'
     page_title=title if title==NAME else title+' — '+NAME
-    result=f'<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="index,follow"><title>{H(page_title)}</title><meta name="description" content="{H(SUBJECT+" social-post index. Browse verified source dates and original post links.")}"><link rel="canonical" href="{H(url)}"><meta property="og:title" content="{H(title)}"><meta property="og:url" content="{H(url)}"><meta property="og:type" content="website"><link rel="icon" href="{PREFIX}icon.svg"><link rel="stylesheet" href="{PREFIX}style.css?v={ASSET}"><link rel="stylesheet" href="{PREFIX}series.css?v={ASSET}">{HEAD}</head><body>{FALLBACK}{header}<main id="main">{content}{footer}</main><div id="status" class="status" role="status" aria-live="polite"></div><dialog id="copy-dialog"><h2>Copy link</h2><p>Select and copy this post’s page URL.</p><textarea readonly aria-label="Post page URL"></textarea><button data-action="close-dialog">Close</button></dialog><script type="application/json" id="page-config">{payload_json}</script><script src="{PREFIX}archive.js?v={ASSET}" defer></script></body></html>'
+    result=f'<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="index,follow"><title>{H(page_title)}</title><meta name="description" content="{H(SUBJECT+" social-post index. Browse verified source dates and original post links.")}"><link rel="canonical" href="{H(url)}"><meta property="og:title" content="{H(title)}"><meta property="og:url" content="{H(url)}"><meta property="og:type" content="website"><link rel="icon" href="{PREFIX}icon.svg"><link rel="stylesheet" href="{PREFIX}style.css?v={ASSET}"><link rel="stylesheet" href="{PREFIX}series.css?v={ASSET}"><link rel="stylesheet" href="{PREFIX}feed.css?v={ASSET}">{HEAD}</head><body>{FALLBACK}{header}<main id="main">{content}{footer}</main>{FEED_PANEL if not relative else feed_panel(APP, "")}{feed_config(APP)}<div id="status" class="status" role="status" aria-live="polite"></div><dialog id="copy-dialog"><h2>Copy link</h2><p>Select and copy this post’s page URL.</p><textarea readonly aria-label="Post page URL"></textarea><button data-action="close-dialog">Close</button></dialog><script type="application/json" id="page-config">{payload_json}</script><script src="{PREFIX}feed.js?v={ASSET}" defer></script><script src="{PREFIX}archive.js?v={ASSET}" defer></script></body></html>'
     target=OUT/relative
     if not relative or relative.endswith('/'):target=target/'index.html'
     target.parent.mkdir(parents=True,exist_ok=True);target.write_text(result,encoding='utf-8',newline='\n')
     URLS.append(url)
 
 def card(row):
-    return f'<li class="archive-record" data-post-id="{row["id"]}"><div class="card-top"><time datetime="{H(row["published_at"] or row["published_date"])}">{row["published_date"]} · {clock(row)}</time><span class="platform">{PLATFORM[row["platform"]]}</span></div><div class="card-actions"><a class="detail-link" href="{post_href(row)}">View post →</a><button data-action="preview" data-id="{row["id"]}">Load original post</button><a href="{H(safe_original(row))}" target="_blank" rel="noopener noreferrer">Original ↗</a></div><div class="embed-slot" id="embed-{row["id"]}" hidden></div></li>'
+    return feed_record(row,APP)
 
 def sources_page(credit):
     source_list=[]
     for s in AUDIT['sources']:
         label=s.get('creator') or s['id']
         source_list.append(f'<li><a href="{H(s["url"])}">{H(label)}</a> · {H(s["id"])}'+(f'<br>Version: {H(s["version"])}' if s.get('version') else '')+(f'<br>{H(s["attribution"])} · <a href="{H(s["upstream"])}">upstream</a>' if s.get('attribution') else '')+'</li>')
-    photo=(f'<p>{H(credit["creator"])} · <a href="{H(credit["source"])}">Original image and license record</a> · <a href="{H(credit["license_url"])}">{H(credit["license"])}</a>. {H(credit["modifications"])}</p>' if APP['photo'] else '<p>Original initials graphic by NaNaCompany. It is not a photograph or depiction of Thibault Sottiaux.</p>')
+    photo=(f'<p>{H(credit["creator"])} · <a href="{H(credit["source"])}">Original image and license record</a> · <a href="{H(credit["license_url"])}">{H(credit["license"])}</a>. {H(credit["modifications"])}</p>' if APP['photo'] else '<p>Original initials graphic by NaNaCompany. The original account photo is displayed only through official embeds.</p>')
     counts=Counter(r['platform'] for r in ROWS)
     coverage=''.join(f'<tr><th>{PLATFORM[k]}</th><td>{v:,}</td></tr>' for k,v in counts.items())
     kind_note='<p>The Sam Altman collection begins with 50 permalinks from a top-post listing. It is a selected set, not his full posting history.</p>' if APP['slug']=='sam-altman-says' else ''
@@ -62,6 +64,7 @@ def sources_page(credit):
     site_page('Sources & coverage',content,'sources.html')
 
 def main():
+    global FEED_PANEL
     assert re.fullmatch('[a-z0-9-]+',APP['slug']) and ORIGIN=='https://nanalab.kr/'+APP['slug']
     assert len({r['id'] for r in ROWS})==len(ROWS)>0
     for row in ROWS:
@@ -69,12 +72,13 @@ def main():
         assert re.fullmatch(r'(?:x-\d+|archive-\d+)',row['id'])
         assert re.fullmatch(r'\d{4}-\d{2}-\d{2}',row['published_date'])
     OUT.mkdir(exist_ok=True)
-    for name in ('style.css','series.css','archive.js','icon.svg'):shutil.copy2(ROOT/'src'/name,OUT/name)
+    for name in ('style.css','series.css','archive.js','icon.svg','feed.js','feed.css'):shutil.copy2(ROOT/'src'/name,OUT/name)
     shutil.copytree(ROOT/'src/assets',OUT/'assets',dirs_exist_ok=True)
     (OUT/'data').mkdir(exist_ok=True)
     credit=json.loads((ROOT/'src/assets/portrait-credit.json').read_text(encoding='utf-8'))
     months=defaultdict(list);days=defaultdict(list)
     for row in ROWS:
+        if not feed_eligible(row):continue
         months[row['published_date'][:7]].append(row);days[row['published_date']].append(row)
     summary={k:v for k,v in AUDIT.items() if k!='failures'}|dict(subject=SUBJECT,account=APP['handle'],platform_counts=dict(Counter(r['platform'] for r in ROWS)),days=len(days),months=len(months),content_mode='official_embeds')
     (OUT/'data/summary.json').write_text(json.dumps(summary,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
@@ -85,10 +89,8 @@ def main():
             key=year+'-'+str(m).zfill(2);label=calendar.month_abbr[m]
             buttons.append(f'<a class="month-button" href="{PREFIX}archive/{key}.html"><b>{label}</b><span>{len(months[key]):,}</span></a>' if key in months else f'<span class="month-button disabled" aria-disabled="true"><b>{label}</b><span>—</span></span>')
         grids.append(f'<section class="year-group"><h3>{year}</h3><nav class="year-grid" aria-label="Months in {year}">{"".join(buttons)}</nav></section>')
-    credit_line=f'<a class="photo-credit" href="{PREFIX}sources.html">Photo credit & license</a>' if APP['photo'] else '<span class="photo-credit">Initials graphic</span>'
-    hero=f'<section class="hero"><div class="identity"><div><img class="portrait" src="{PREFIX}{APP["portrait"]}" width="150" height="188" alt="{H(SUBJECT) if APP["photo"] else "Thibault Sottiaux initials graphic"}" fetchpriority="high">{credit_line}</div><div><h1>{H(NAME)}</h1><p class="subject">{H(SUBJECT)} · <a href="{H(APP["profile"])}">@{H(APP["handle"])}</a></p></div></div><div class="archive-card"><p>ARCHIVE SNAPSHOT</p><strong>{len(ROWS):,}</strong><span>indexed post permalinks</span><p class="asof">{AUDIT["first"]} — {AUDIT["last"]}<br>Partial coverage · Content from original platforms</p></div></section>'
-    coverage=f'<section class="coverage"><strong>Coverage</strong><p>Dates and original links from the collected sources. Post content loads from the original platform. This is a partial snapshot.</p><a href="{PREFIX}sources.html">Coverage & sources →</a></section>'
-    site_page(NAME,hero+coverage+f'<section id="archive" class="year-index"><h2>Browse by year and month</h2><p>Choose a month, then a day to see its full indexed post list.</p>{"".join(grids)}</section>','')
+    FEED_PANEL=feed_panel(APP,''.join(grids))
+    feed_stats=make_home_feed(ROOT,APP,ROWS,AUDIT,site_page,grids)
     sources_page(credit)
     site_page('Privacy',f'<section class="sources"><h1>Privacy</h1><p>This static site has no accounts or server-side reading history. Copy and share use your browser or operating system. Loading an original post connects to X or Meta; those services may receive your visit and device information and may use cookies.</p><p>Published pages use Google Analytics 4, Google Tag Manager, Google AdSense and Cloudflare Web Analytics. Search fields, copied content and other user inputs are not sent as custom analytics events. Page-view URLs omit query strings and fragments. <a href="https://policies.google.com/privacy">Google privacy</a> · <a href="https://www.cloudflare.com/privacypolicy/">Cloudflare privacy</a>.</p><p>Embeds are optional on browse lists. Individual post pages load an original embed and preserve an external permalink if it fails.</p></section>','privacy.html')
     for month,items in sorted(months.items(),reverse=True):
@@ -105,7 +107,7 @@ def main():
     for row in ROWS:
         url=ORIGIN+'/posts/'+row['id']+'.html'
         record_label=('Archive record '+row['post_id']) if row['id'].startswith('archive-') else ('Post '+row['post_id'])
-        content=f'<section class="sources post-page"><nav class="breadcrumb"><a href="{PREFIX}#archive">Archive</a> / <a href="{PREFIX}archive/{row["published_date"][:7]}.html">{row["published_date"][:7]}</a> / <a href="{PREFIX}archive/{row["published_date"]}.html">{row["published_date"]}</a></nav><h1>{H(SUBJECT)}</h1><p class="post-date"><time datetime="{H(row["published_at"] or row["published_date"])}">{row["published_date"]} · {clock(row)}</time></p><div class="meta"><span>{PLATFORM[row["platform"]]}</span><span>{H(record_label)}</span></div><div class="original-panel"><p class="hint">Original content from {PLATFORM[row["platform"]]}. If unavailable, open the original link below.</p><div class="embed-slot" id="embed-{row["id"]}"></div><button data-action="preview" data-id="{row["id"]}">Load / retry original post</button></div><div class="actions post-actions"><a href="{H(safe_original(row))}" target="_blank" rel="noopener noreferrer">Open original ↗</a><button data-action="copy" data-url="{H(url)}">Copy page link</button><button data-action="share" data-url="{H(url)}">Share</button></div><p class="provenance">Source IDs: {H(", ".join(row["source_ids"]))}. Date precision: {H(row["date_precision"])}.'+(f' <a href="{H(row["source_url"])}">Source record</a>.' if row.get('source_url') else '')+f' <a href="{PREFIX}sources.html">Coverage details</a>.</p></section>'
+        content=f'<section class="sources post-page"><nav class="breadcrumb"><a href="{PREFIX}archive-menu.html" data-feed-action="archive-open">Archive</a> / <a href="{PREFIX}archive/{row["published_date"][:7]}.html">{row["published_date"][:7]}</a> / <a href="{PREFIX}archive/{row["published_date"]}.html">{row["published_date"]}</a></nav><h1>{H(SUBJECT)}</h1><p class="post-date"><time datetime="{H(row["published_at"] or row["published_date"])}">{row["published_date"]} · {clock(row)}</time></p><div class="meta"><span>{PLATFORM[row["platform"]]}</span><span>{H(record_label)}</span></div><div class="original-panel"><p class="hint">Original content from {PLATFORM[row["platform"]]}. If unavailable, open the original link below.</p><div class="embed-slot" id="embed-{row["id"]}"></div><button data-action="preview" data-id="{row["id"]}">Load / retry original post</button></div><div class="actions post-actions"><a href="{H(safe_original(row))}" target="_blank" rel="noopener noreferrer">Open original ↗</a><button data-action="copy" data-url="{H(url)}">Copy page link</button><button data-action="share" data-url="{H(url)}">Share</button></div><p class="provenance">Source IDs: {H(", ".join(row["source_ids"]))}. Date precision: {H(row["date_precision"])}.'+(f' <a href="{H(row["source_url"])}">Source record</a>.' if row.get('source_url') else '')+f' <a href="{PREFIX}sources.html">Coverage details</a>.</p></section>'
         site_page(SUBJECT+' · '+row['published_date']+' · '+row['post_id'],content,'posts/'+row['id']+'.html','post',dict(records=[row]))
     navigation=[u for u in URLS if '/posts/' not in u];posts=[u for u in URLS if '/posts/' in u]
     maps=[('sitemap-main.xml',navigation)]+[(f'sitemap-posts-{i//50000+1:02}.xml',posts[i:i+50000]) for i in range(0,len(posts),50000)]

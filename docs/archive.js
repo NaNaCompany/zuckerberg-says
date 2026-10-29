@@ -43,6 +43,8 @@
   }catch{slot.dataset.loaded='false';fallback(slot,row,'This platform could not display the post here.');}
  }
  function card(row){
+  if(window.SaysFeed?.createCard)return window.SaysFeed.createCard(row);
+
   const item=create('li','archive-record');item.dataset.postId=row.id;
   const top=create('div','card-top');const time=create('time','',row.published_date+' · '+(row.published_at?row.published_at.slice(11,19)+' UTC':'Time not provided'));time.dateTime=row.published_at||row.published_date;
   top.append(time,create('span','platform',({x:'X / Twitter',facebook:'Facebook',threads:'Threads',instagram:'Instagram'})[row.platform]));
@@ -72,7 +74,7 @@
    else if(action==='shuffle'){
     const error=document.querySelector('#load-error');error.hidden=true;
     if(!monthData){const response=await fetch(config.monthData,{credentials:'same-origin'});if(!response.ok)throw new Error('Month unavailable');const data=await response.json();if(!Array.isArray(data)||!data.every(row=>row.published_date.startsWith(config.month)&&row.text===null))throw new Error('Invalid month data');data.forEach(safeUrl);monthData=data;data.forEach(row=>records.set(row.id,row));}
-    document.querySelector('#records').replaceChildren(...sample(monthData,50).map(card));notify('New random sample loaded.');
+    document.querySelector('#records').replaceChildren(...sample(monthData,50).map(card));window.SaysFeed?.hydrate(document.querySelector('#records'));notify('New random sample loaded.');
    }else if(action==='copy'||action==='share'){
     const url=new URL(button.dataset.url);if(url.origin!==new URL(config.origin).origin||!url.href.startsWith(config.origin+'/posts/'))throw new Error('Invalid share URL');
     if(action==='share'&&navigator.share){try{await navigator.share({title:config.name,url:url.href});return;}catch(error){if(error.name==='AbortError')return;}}

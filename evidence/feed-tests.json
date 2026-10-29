@@ -1,0 +1,18 @@
+{
+  "slug": "zuckerberg-says",
+  "status": "passed",
+  "steps": [
+    {
+      "step": "build",
+      "exit_code": 0
+    },
+    {
+      "step": "static",
+      "exit_code": 0
+    },
+    {
+      "step": "runtime",
+      "exit_code": 0
+    }
+  ]
+}

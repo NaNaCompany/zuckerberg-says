@@ -1,0 +1,75 @@
+/* Additive Says feed styles. Existing archive/search routes retain their stylesheet. */
+body{padding-bottom:calc(170px + env(safe-area-inset-bottom,0px))}
+.feed-home .hero,.hero.feed-hero{display:block;padding:26px 0 20px}
+.feed-home .identity,.feed-hero .identity{gap:22px;align-items:center}
+.feed-hero .feed-portrait{flex:0 0 112px;min-width:112px}
+.feed-hero .feed-person{flex:1;min-width:0}
+.feed-hero .identity>div:has(>.portrait){flex-shrink:0}
+.feed-home .portrait,.feed-hero .portrait{width:112px;height:140px;object-fit:cover;object-position:center top}
+.feed-home .identity h1,.feed-hero .identity h1{font-size:clamp(30px,4vw,48px);letter-spacing:-1.8px}
+.feed-home .archive-card,.feed-home .coverage{display:none}
+.feed-summary{font-size:12px;line-height:1.7;color:#69745e;margin:10px 0 0}
+.feed-summary a{color:inherit;text-underline-offset:3px}
+.feed-section{max-width:760px;margin:0 auto;padding:22px 0;scroll-margin-top:20px}
+.feed-section>h2{font-size:24px;line-height:1.3;margin:0 0 8px}
+.feed-section>.hint,.feed-order-note{font-size:12px;line-height:1.7;color:#68755d;margin:0 0 20px}
+.feed-list,#popular-records,#latest-records{list-style:none;margin:0;padding:0}
+.feed-record,.archive-list .feed-record{display:block;min-width:0;list-style:none;border:1px solid #d5dbcd;border-radius:7px;background:#f8f8f2;margin:0 0 20px;padding:18px 20px;overflow-wrap:anywhere;scroll-margin-top:18px}
+.feed-record .feed-record-data{display:none}
+.feed-meta{display:flex;align-items:center;gap:10px 16px;flex-wrap:wrap;color:#6c7862;font-size:11px;line-height:1.6}
+.feed-meta time,.archive-list .feed-meta time{display:inline;font-size:11px;font-variant-numeric:tabular-nums}
+.feed-meta .feed-platform,.archive-list .feed-meta .feed-platform{font-size:10px;letter-spacing:.3px;margin:0}
+.feed-likes{font-variant-numeric:tabular-nums;color:#52634a;white-space:nowrap;font-size:11px}
+.feed-record .feed-text{font-size:17px;line-height:1.75;white-space:pre-wrap;overflow-wrap:anywhere;margin:14px 0;color:#303b2b}
+.feed-embed{min-height:200px;max-width:100%;overflow:hidden;padding:12px 0 4px}
+.feed-embed:has(iframe),.feed-record:has(.feed-text) .feed-embed{min-height:0}
+.feed-embed iframe{display:block;width:100%;max-width:550px;min-height:470px;margin:0 auto;border:0;border-radius:5px;background:#fff}
+.feed-embed iframe[src*="truthsocial.com"]{min-height:560px}
+.feed-embed .twitter-tweet{margin:8px auto!important}
+.feed-embed-note{font-size:12px;line-height:1.8;color:#727e66;margin:12px 0}
+.feed-embed-note a{display:inline!important;padding:0!important;text-decoration:underline!important;text-underline-offset:3px}
+.feed-actions,.archive-list .feed-actions{display:flex;align-items:center;flex-wrap:wrap;gap:10px 17px;font-size:11px;margin-top:10px}
+.feed-actions>a,.archive-list .feed-actions>a{display:inline-flex;align-items:center;padding:7px 0;min-height:38px;font-size:11px;text-decoration:none}
+.feed-actions button,.archive-list .feed-actions button{border:1px solid #cbd3c0;background:transparent;border-radius:4px;color:#43543b;font-size:11px;min-height:38px;padding:8px 12px;cursor:pointer}
+.feed-actions button:disabled{opacity:.65;cursor:default}
+#feed-next{display:block;text-align:center;width:min(100%,360px);border:1px solid #829274;border-radius:5px;padding:14px 20px;margin:18px auto;min-height:46px;text-decoration:none;font-size:13px;color:#34412f;background:#edf1e7}
+#feed-next[aria-disabled="true"]{opacity:.6;pointer-events:none}
+#feed-status{font-size:12px;text-align:center;line-height:1.7;color:#6f7d62;min-height:22px;padding:6px 0}
+#feed-sentinel{height:2px}
+#archive-toggle{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(180px + env(safe-area-inset-bottom,0px));z-index:2147483000;min-width:58px;min-height:48px;border:1px solid #748669;border-radius:8px;background:#34412f;color:#fff;padding:12px 15px;box-shadow:0 3px 15px #23321930;font-size:13px;cursor:pointer}
+#archive-panel{position:fixed;right:max(14px,env(safe-area-inset-right,0px));top:max(18px,env(safe-area-inset-top,0px));bottom:calc(180px + env(safe-area-inset-bottom,0px));width:min(440px,calc(100vw - 28px));z-index:2147483002;background:#f5f4ee;border:1px solid #b8c5ad;border-radius:9px;padding:20px;overflow:auto;overscroll-behavior:contain;box-shadow:0 5px 30px #19221140}
+#archive-panel .archive-panel-heading,#archive-panel .archive-panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+#archive-panel h2{font-size:21px;margin:0}
+#archive-close{min-width:44px;min-height:44px;border:1px solid #b8c5ad;border-radius:5px;background:transparent;color:#34412f;cursor:pointer;padding:8px 12px;font-size:13px}
+#archive-panel .year-index{padding:0}
+#archive-panel .year-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+#archive-panel .year-group{padding:6px 0 15px}
+#archive-panel .year-group h3{font-size:20px}
+#archive-panel .month-button{padding:10px 3px;min-height:48px}
+#archive-panel .month-button b{font-size:13px}
+#archive-panel .month-button span{font-size:10px}
+#archive-panel a:focus-visible,#archive-panel button:focus-visible,#archive-toggle:focus-visible{outline:3px solid #b54734;outline-offset:3px}
+#archive-backdrop{position:fixed;inset:0;background:#12200d55;z-index:2147483001}
+.feed-archive-open{overflow:hidden}
+@media(min-width:1050px){#archive-toggle{right:26px}#archive-panel{right:26px}}
+@media(max-width:650px){
+ .feed-home .hero,.hero.feed-hero{padding:21px 0 17px}
+ .feed-home .identity,.feed-hero .identity{gap:15px}
+ .feed-hero .feed-portrait{flex-basis:88px;min-width:88px}
+ .feed-home .portrait,.feed-hero .portrait{width:88px;height:110px}
+ .feed-home .identity h1,.feed-hero .identity h1{font-size:31px;letter-spacing:-1.4px}
+ .feed-home .subject,.feed-hero .subject{font-size:12px;margin-top:8px;line-height:1.7}
+ .feed-home .photo-credit,.feed-hero .photo-credit{font-size:9px;margin-top:5px;max-width:100px}
+ .feed-summary{font-size:11px}
+ .feed-section{padding:19px 0}
+ .feed-section>h2{font-size:22px}
+ .feed-record,.archive-list .feed-record{padding:14px 12px;margin-bottom:16px}
+ .feed-meta,.feed-meta time,.archive-list .feed-meta time{font-size:10px;gap:7px 12px}
+ .feed-record .feed-text{font-size:16px;line-height:1.75}
+ .feed-embed{min-height:180px}
+ .feed-embed iframe{min-height:450px}
+ #archive-panel{padding:16px}
+ #archive-toggle{font-size:12px;padding:11px 13px}
+}
+@media(min-width:651px) and (max-width:700px){.feed-hero .feed-portrait{flex-basis:88px;min-width:88px}.feed-hero .portrait{width:88px;height:110px}}
+@media(prefers-reduced-motion:reduce){#archive-panel,#archive-toggle,.feed-record{scroll-behavior:auto;transition:none}}

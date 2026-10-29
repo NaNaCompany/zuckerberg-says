@@ -7,7 +7,7 @@
   "profile": "https://www.facebook.com/zuck",
   "initials": "MZ",
   "color": "#526d86",
-  "photo": "zuck",
+  "photo": true,
   "photo_source": "https://commons.wikimedia.org/wiki/File:Mark_Zuckerberg_F8_2018_Keynote_(cropped).jpg",
   "photo_creator": "Anthony Quintano; cropped version from Wikimedia Commons",
   "photo_license": "CC BY 2.0",
@@ -20,5 +20,6 @@
   "coverage": "partial",
   "content_mode": "official_embeds",
   "browse_timezone": "UTC",
-  "portrait": "assets/portrait.jpg"
+  "portrait": "assets/portrait.jpg",
+  "feed_version": "20261029"
 }

@@ -38,3 +38,13 @@ The build writes `docs/`. GitHub Pages serves `main:/docs`; there is no per-app 
 Portrait and graphic attribution, license links and modification notices are preserved in `src/assets/portrait-credit.json` and the public Sources & coverage page. Original JPEG bytes are retained. Tibo uses an original initials graphic rather than an unlicensed portrait. Raw third-party source downloads are excluded from this repository.
 
 The stylesheet follows the owner's existing Trump Says design. Independent project; not affiliated with the subjects or social platforms.
+
+## Ranked home feed
+
+The main page begins with up to 100 collected posts sorted by known source like count. Null counts are excluded from that ordering. It then continues newest first, without popular-post duplicates, using sequential static HTML pages fetched on scroll. Load more remains a normal pagination link without JavaScript. Like totals are snapshots with provenance, not live totals or a complete-account ranking.
+
+The right floating Archive menu offers the existing year/month routes. The full menu is shared and fetched only when needed outside the home. Original platform content automatically loads near the viewport in all lists; retry/original links remain available. Local previews do not send publisher or platform requests. The separate original TXT archive is local only and is not shipped in this repository. No translations or uncleared full post bodies are added to public pages.
+
+Verified portraits keep source, creator, license, modification and hash records on Sources & coverage. Tibo uses the photograph within official X embeds until a standalone reusable portrait is available.
+
+Additional runtime regression suite: node --test tests/feed-runtime.test.mjs. Build and exhaustive page validation remain python scripts/build_site.py and python scripts/check_site.py.
