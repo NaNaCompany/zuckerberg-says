@@ -36,6 +36,57 @@ def safe_original(row):
 
 def clock(row):return row['published_at'][11:19]+' UTC' if row['published_at'] else 'Time not provided'
 def post_href(row):return PREFIX+'posts/'+row['id']+'.html'
+# Homepage social photo metadata. The original photo and credit remain unchanged.
+def _homepage_jpeg_dimensions(raw):
+    assert raw[:2]==b'\xff\xd8','Homepage portrait must be a JPEG'
+    position=2;dimensions=None;orientation=1
+    while position<len(raw):
+        assert raw[position]==0xff,'Invalid JPEG marker'
+        while position<len(raw) and raw[position]==0xff:position+=1
+        if position>=len(raw):break
+        marker=raw[position];position+=1
+        if marker in (0xd9,0xda):break
+        if marker in (0xd8,0x01) or 0xd0<=marker<=0xd7:continue
+        assert position+2<=len(raw),'Truncated JPEG marker'
+        length=int.from_bytes(raw[position:position+2],'big')
+        assert length>=2 and position+length<=len(raw),'Invalid JPEG segment length'
+        segment=raw[position+2:position+length];position+=length
+        if marker in (0xc0,0xc1,0xc2,0xc3,0xc5,0xc6,0xc7,0xc9,0xca,0xcb,0xcd,0xce,0xcf):
+            assert len(segment)>=5
+            dimensions=(int.from_bytes(segment[3:5],'big'),int.from_bytes(segment[1:3],'big'))
+        if marker==0xe1 and segment.startswith(b'Exif\x00\x00'):
+            tiff=segment[6:]
+            if len(tiff)>=8 and tiff[:2] in (b'II',b'MM'):
+                endian='little' if tiff[:2]==b'II' else 'big'
+                offset=int.from_bytes(tiff[4:8],endian)
+                if offset+2<=len(tiff):
+                    count=int.from_bytes(tiff[offset:offset+2],endian)
+                    for index in range(min(count,512)):
+                        entry=tiff[offset+2+12*index:offset+14+12*index]
+                        if len(entry)==12 and int.from_bytes(entry[:2],endian)==0x0112 and int.from_bytes(entry[2:4],endian)==3 and int.from_bytes(entry[4:8],endian)==1:
+                            orientation=int.from_bytes(entry[8:10],endian)
+    assert dimensions and all(value>0 for value in dimensions),'JPEG dimensions unavailable'
+    return dimensions[::-1] if orientation in (5,6,7,8) else dimensions
+
+
+def homepage_social_meta():
+    assert APP.get('photo'),'Homepage photo metadata requires a verified portrait'
+    relative=Path(APP['portrait'])
+    assert not relative.is_absolute() and '..' not in relative.parts
+    picture=(ROOT/'src'/relative).resolve();picture.relative_to((ROOT/'src/assets').resolve())
+    raw=picture.read_bytes()
+    credit=json.loads((ROOT/'src/assets/portrait-credit.json').read_text(encoding='utf-8'))
+    assert hashlib.sha256(raw).hexdigest()==credit['sha256'],'Homepage photo does not match the credit record'
+    assert credit.get('creator') and credit.get('license') and credit.get('source'),'Homepage photo credit incomplete'
+    width,height=_homepage_jpeg_dimensions(raw)
+    image_url=ORIGIN+'/'+relative.as_posix()
+    parsed=urlsplit(image_url)
+    assert parsed.scheme=='https' and parsed.hostname=='nanalab.kr' and not parsed.username and not parsed.password
+    alt='Portrait of '+SUBJECT
+    fields=[('property','og:image',image_url),('property','og:image:alt',alt),('property','og:image:width',width),('property','og:image:height',height),('property','og:image:type','image/jpeg'),('name','twitter:card','summary_large_image'),('name','twitter:image',image_url),('name','twitter:image:alt',alt)]
+    return ''.join(f'<meta {kind}="{H(name)}" content="{H(value)}">' for kind,name,value in fields)
+
+
 def site_page(title,content,relative,kind='browse',config=None):
     url=ORIGIN+'/'+relative
     payload={'kind':kind,'origin':ORIGIN,'base':PREFIX,'name':NAME,**(config or {})}
@@ -43,7 +94,7 @@ def site_page(title,content,relative,kind='browse',config=None):
     header=f'<a class="skip" href="#main">Skip to content</a><header class="topbar"><a class="wordmark" href="{PREFIX}">{H(APP["wordmark"])}<span>SAYS</span><b aria-hidden="true">.</b></a><nav aria-label="Pages"><a href="{PREFIX}archive-menu.html" data-feed-action="archive-open">Archive</a><a href="{PREFIX}sources.html">Sources & coverage</a></nav></header>'
     footer=f'<footer><span>Independent archive · Partial coverage</span><a href="{PREFIX}sources.html">Sources & coverage</a><a href="{PREFIX}privacy.html">Privacy</a><a class="more" href="https://nanalab.kr/apps/">More Apps</a></footer>'
     page_title=title if title==NAME else title+' — '+NAME
-    result=f'<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="index,follow"><title>{H(page_title)}</title><meta name="description" content="{H(SUBJECT+" social-post index. Browse verified source dates and original post links.")}"><link rel="canonical" href="{H(url)}"><meta property="og:title" content="{H(title)}"><meta property="og:url" content="{H(url)}"><meta property="og:type" content="website"><link rel="icon" href="{PREFIX}icon.svg"><link rel="stylesheet" href="{PREFIX}style.css?v={ASSET}"><link rel="stylesheet" href="{PREFIX}series.css?v={ASSET}"><link rel="stylesheet" href="{PREFIX}feed.css?v={ASSET}">{HEAD}</head><body>{FALLBACK}{header}<main id="main">{content}{footer}</main>{FEED_PANEL if not relative else feed_panel(APP, "")}{feed_config(APP)}<div id="status" class="status" role="status" aria-live="polite"></div><dialog id="copy-dialog"><h2>Copy link</h2><p>Select and copy this post’s page URL.</p><textarea readonly aria-label="Post page URL"></textarea><button data-action="close-dialog">Close</button></dialog><script type="application/json" id="page-config">{payload_json}</script><script src="{PREFIX}feed.js?v={ASSET}" defer></script><script src="{PREFIX}archive.js?v={ASSET}" defer></script></body></html>'
+    result=f'<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="index,follow"><title>{H(page_title)}</title><meta name="description" content="{H(SUBJECT+" social-post index. Browse verified source dates and original post links.")}"><link rel="canonical" href="{H(url)}"><meta property="og:title" content="{H(title)}"><meta property="og:url" content="{H(url)}"><meta property="og:type" content="website">{homepage_social_meta() if not relative else ""}<link rel="icon" href="{PREFIX}icon.svg"><link rel="stylesheet" href="{PREFIX}style.css?v={ASSET}"><link rel="stylesheet" href="{PREFIX}series.css?v={ASSET}"><link rel="stylesheet" href="{PREFIX}feed.css?v={ASSET}">{HEAD}</head><body>{FALLBACK}{header}<main id="main">{content}{footer}</main>{FEED_PANEL if not relative else feed_panel(APP, "")}{feed_config(APP)}<div id="status" class="status" role="status" aria-live="polite"></div><dialog id="copy-dialog"><h2>Copy link</h2><p>Select and copy this post’s page URL.</p><textarea readonly aria-label="Post page URL"></textarea><button data-action="close-dialog">Close</button></dialog><script type="application/json" id="page-config">{payload_json}</script><script src="{PREFIX}feed.js?v={ASSET}" defer></script><script src="{PREFIX}archive.js?v={ASSET}" defer></script></body></html>'
     target=OUT/relative
     if not relative or relative.endswith('/'):target=target/'index.html'
     target.parent.mkdir(parents=True,exist_ok=True);target.write_text(result,encoding='utf-8',newline='\n')
