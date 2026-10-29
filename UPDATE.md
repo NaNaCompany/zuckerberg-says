@@ -30,3 +30,13 @@
 ## 2026-10-29 · Cache-aware navigation stylesheet release
 
 - Refresh the static asset version in every generated HTML page so existing browser caches request the corrected navigation stylesheet immediately after the new page is served. Python builds already derive this version from the asset hash; Trump build sources now use the new CSS release version. Every changed HTML byte is accounted for by the exact old-to-new version replacement. No post contents or sitemap URLs changed.
+
+
+## 2026-10-29 — Text-first lists and full captured source text on details
+
+- User-requested display policy: home, continuation, month, day and shuffled list cards render text-first previews linking to the existing individual static detail pages. Lists do not initialize platform embeds; individual details retain both available captured text and the official embed/original link.
+- Previews are capped at 800 Unicode characters including the ellipsis: when longer, 799 source characters plus one … character. The captured source string remains intact; individual details display the entire captured available string rather than the preview truncation.
+- Public text is supplied by the separate data/post-texts.json overlay, without rewriting data/posts.json. Source text stays in its original language. Partial source strings, original-page metadata descriptions, empty bodies and unavailable text retain accurate source/status labels. A source description is not relabeled as a complete authored post; missing text is not inferred, translated or generated.
+- This supersedes the earlier feed's metadata/embed-only display policy. Historical UPDATE entries remain unchanged as records of their release. Source provenance, rights declarations and original snapshot boundaries remain applicable.
+- Existing portraits and their creator/source/license/hash records, four publisher integrations with GTM noscript, local-host request guards, More Apps, original permalinks, static page paths and canonical identities are preserved by the requested change. Source like-count snapshots, repost exclusions, archive navigation and chronological pagination remain part of the feed contract.
+- Release evidence directory: .tools/says-text-first-20261029/. This documentation entry records the requested source/UI policy; it does not by itself establish completed build/tests, commit/push, Pages publication, production HTTP/browser verification or search-engine indexing. The parent release workflow records those outcomes separately.

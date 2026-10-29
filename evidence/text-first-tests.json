@@ -1,0 +1,34 @@
+{
+  "slug": "zuckerberg-says",
+  "status": "passed",
+  "steps": [
+    {
+      "step": "build",
+      "exit_code": 0
+    },
+    {
+      "step": "static",
+      "exit_code": 0
+    },
+    {
+      "step": "runtime",
+      "exit_code": 0,
+      "verified_by": "final-runtime.json: final cache-aware sources"
+    }
+  ],
+  "runtime_counts": {
+    "tests": 38,
+    "pass": 38,
+    "fail": 0,
+    "cancelled": 0,
+    "skipped": 0
+  },
+  "runtime_source_sha256": {
+    "src\\feed.js": "898b26d4bbbb915dc12f57703f217749157954a1c2f4bf745a46bbe26e089a50",
+    "src\\feed.css": "bc2b8e4492ee482c5679f9d367d04e8fed95da56bfa09844676c7744acb71392",
+    "tests\\feed-runtime.test.mjs": "116c277c09453794878632432d5f1594b84a072531e135b7c84c0446bb2f8562",
+    "tests\\publisher.test.mjs": "52f8e4c82c929ce6894e0b91003800a9321bde1a23e695b1e0a107f0464d72cd",
+    "tests\\runtime.test.mjs": "1f4039498e333ddbc4ac99e4465f1219c95855392e320a2f745ded471fd4d7dd",
+    "src/archive.js": "69b75d3986bbbfa757529a340b73452c4f72b021c7b7f6a04eedfdeb5d54858e"
+  }
+}

@@ -21,6 +21,16 @@ body{padding-bottom:calc(170px + env(safe-area-inset-bottom,0px))}
 .feed-meta .feed-platform,.archive-list .feed-meta .feed-platform{font-size:10px;letter-spacing:.3px;margin:0}
 .feed-likes{font-variant-numeric:tabular-nums;color:#52634a;white-space:nowrap;font-size:11px}
 .feed-record .feed-text{font-size:17px;line-height:1.75;white-space:pre-wrap;overflow-wrap:anywhere;margin:14px 0;color:#303b2b}
+.feed-record a.feed-text-link,.archive-list .feed-record a.feed-text-link,.feed-record .feed-text-link>a{display:block;min-width:0;padding:10px 0 4px;text-decoration:none;color:#303b2b;border-radius:3px;overflow-wrap:anywhere;white-space:pre-wrap}
+.feed-record a.feed-text-link .feed-text,.feed-record .feed-text-link>a .feed-text{margin:0 0 10px;white-space:pre-wrap;overflow-wrap:anywhere}
+.feed-record a.feed-text-link:hover .feed-text,.feed-record .feed-text-link>a:hover .feed-text{text-decoration:underline;text-decoration-color:#829274;text-underline-offset:3px;text-decoration-thickness:1px}
+.feed-record a.feed-text-link:focus-visible,.feed-record .feed-text-link>a:focus-visible{outline:3px solid #b54734;outline-offset:4px}
+.feed-record .feed-read-more{display:inline-block;font-size:11px;font-weight:600;line-height:1.7;color:#4b6141;text-decoration:underline;text-underline-offset:3px;margin:0 0 2px}
+.feed-record .feed-text-unavailable{font-size:14px;color:#6d7863;font-style:normal}
+.feed-record .feed-text-body{white-space:pre-wrap;overflow-wrap:anywhere;font-size:17px;font-weight:400;line-height:1.75;color:#303b2b}
+.feed-record .feed-text-note{font-size:11px;font-weight:400;line-height:1.7;color:#6d7863;margin:8px 0 2px;white-space:pre-wrap;overflow-wrap:anywhere}
+.post-text{white-space:pre-wrap;overflow-wrap:anywhere}
+.post-text-note{font-size:12px;line-height:1.8;overflow-wrap:anywhere}
 .feed-embed{min-height:200px;max-width:100%;overflow:hidden;padding:12px 0 4px}
 .feed-embed:has(iframe),.feed-record:has(.feed-text) .feed-embed{min-height:0}
 .feed-embed iframe{display:block;width:100%;max-width:550px;min-height:470px;margin:0 auto;border:0;border-radius:5px;background:#fff}
@@ -66,6 +76,7 @@ body{padding-bottom:calc(170px + env(safe-area-inset-bottom,0px))}
  .feed-record,.archive-list .feed-record{padding:14px 12px;margin-bottom:16px}
  .feed-meta,.feed-meta time,.archive-list .feed-meta time{font-size:10px;gap:7px 12px}
  .feed-record .feed-text{font-size:16px;line-height:1.75}
+ .feed-record .feed-text-body{font-size:16px}
  .feed-embed{min-height:180px}
  .feed-embed iframe{min-height:450px}
  #archive-panel{padding:16px;top:max(88px,env(safe-area-inset-top,0px));bottom:calc(300px + env(safe-area-inset-bottom,0px));min-height:160px}

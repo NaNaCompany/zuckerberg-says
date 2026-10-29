@@ -1,4 +1,4 @@
-/* Shared Says feed: parsed same-origin HTML pages, inert metadata and lazy official embeds. */
+/* Shared Says text-first lists: same-origin HTML pagination and inert text links. Detail pages own all platform embeds. */
 (() => {
   'use strict';
   const configNode = document.querySelector('#feed-config');
@@ -9,7 +9,7 @@
   const canonical = new URL(config.origin);
   if (!/^\/[a-z0-9-]+\/$/.test(config.base || '') || canonical.protocol !== 'https:' ||
       canonical.pathname.replace(/\/$/, '') + '/' !== config.base || canonical.search || canonical.hash) return;
-  const production = ['nanalab.kr', 'www.nanalab.kr', 'nanacompany.github.io'].includes(here.hostname.toLowerCase());
+  const listTextOnly = config.listTextOnly === true;
   const allowedHosts = {
     x: ['x.com', 'twitter.com', 'www.x.com', 'www.twitter.com'],
     facebook: ['facebook.com', 'www.facebook.com', 'm.facebook.com'],
@@ -27,10 +27,8 @@
   const seen = new Set();
   const registered = new WeakSet();
   const states = new WeakMap();
-  const activeCards = new Set();
   const visitedPages = new Set();
-  const pendingEmbeds = [];
-  let embedWorkers = 0, scriptPromise = null, loading = false, autoBlocked = false;
+  let loading = false, autoBlocked = false;
   let nextURL = null, lastLatestTime = Infinity, lastPage = 1, observer = null, scrollTick = false;
   const create = (tag, className, text) => {
     const e = document.createElement(tag);
@@ -72,6 +70,19 @@
     if (value.published_at != null && (typeof value.published_at !== 'string' || !Number.isFinite(Date.parse(value.published_at)))) throw new Error('Invalid post timestamp');
     if (value.like_count != null && (!Number.isSafeInteger(value.like_count) || value.like_count < 0)) throw new Error('Invalid like count');
     if (value.text != null && (config.allowText !== true || typeof value.text !== 'string' || value.text.length > 500000)) throw new Error('Uncleared or invalid text');
+    if (listTextOnly && typeof value.text === 'string' && [...value.text].length > 800) throw new Error('List text exceeds 800 Unicode characters');
+    if (value.text_status != null && (typeof value.text_status !== 'string' || value.text_status.length > 100)) throw new Error('Invalid text status');
+    if (value.content_status != null && (typeof value.content_status !== 'string' || value.content_status.length > 100)) throw new Error('Invalid content status');
+    if (value.text_source != null && (typeof value.text_source !== 'string' && (typeof value.text_source !== 'object' || Array.isArray(value.text_source)))) throw new Error('Invalid text source');
+    const textSourceURL = typeof value.text_source === 'string' ? value.text_source : value.text_source?.url;
+    if (textSourceURL != null) {
+      if (typeof textSourceURL !== 'string') throw new Error('Invalid text source URL');
+      const url = new URL(textSourceURL);
+      if (url.protocol !== 'https:' || !url.hostname || url.username || url.password) throw new Error('Untrusted text source URL');
+    }
+    if (value.text_truncated != null && typeof value.text_truncated !== 'boolean') throw new Error('Invalid text truncation flag');
+    if (value.truncated != null && typeof value.truncated !== 'boolean') throw new Error('Invalid truncation flag');
+    if (value.source_ids != null && (!Array.isArray(value.source_ids) || value.source_ids.length > 128 || value.source_ids.some(id => typeof id !== 'string' || id.length > 500))) throw new Error('Invalid source identifiers');
     const original = originalURL(value);
     const expectedPath = config.base + 'posts/' + value.id.replaceAll(':', '-') + '.html';
     const detail = new URL(value.permalink || expectedPath, canonical.origin);
@@ -81,7 +92,10 @@
       original_url: original.href, published_at: value.published_at || null, published_date: value.published_date,
       permalink: detail.pathname, like_count: value.like_count ?? null,
       likes_source: value.likes_source ?? null, likes_captured_at: value.likes_captured_at ?? null,
-      text: value.text ?? null, post_kind: value.post_kind || value.kind || null
+      text: value.text ?? null, text_status: value.text_status ?? null, text_source: value.text_source ?? null,
+      text_truncated: value.text_truncated ?? null, truncated: value.truncated ?? null,
+      content_status: value.content_status ?? null, source_ids: value.source_ids ?? null,
+      post_kind: value.post_kind || value.kind || null
     };
   }
 
@@ -129,146 +143,63 @@
     const row = validateRecord(value);
     const item = create('li', 'feed-record archive-record');
     item.dataset.feedId = row.id; item.dataset.postId = row.id;
-    const data = create('script', 'feed-record-data'); data.type = 'application/json'; data.textContent = JSON.stringify(row).replaceAll('<', '\\u003c'); item.append(data);
+    const data = create('script', 'feed-record-data'); data.type = 'application/json'; data.textContent = JSON.stringify(row).replaceAll('<', '\\u003c');
+    item.append(recordMeta(row), textLink(row), textNote(row), data);
+    return item;
+  }
+
+  function recordMeta(row) {
     const meta = create('div', 'feed-meta card-top');
     const date = create('time', '', displayDate(row));
     date.dateTime = row.published_at || row.published_date;
-    meta.append(date, create('span', 'feed-platform platform', platformNames[row.platform]));
+    meta.append(date);
     if (row.like_count !== null) {
       const approximate = row.likes_source && typeof row.likes_source === 'object' && row.likes_source.count_precision === 'display-rounded';
       const likes = create('span', 'feed-likes', (approximate ? '~' : '') + new Intl.NumberFormat('en-US').format(row.like_count) + ' likes');
       likes.title = 'Likes recorded in the source snapshot' + (row.likes_captured_at ? ' · ' + row.likes_captured_at : ''); meta.append(likes);
-    }
-    item.append(meta);
-    if (row.text) item.append(create('p', 'feed-text', row.text));
-    const slot = create('div', 'feed-embed'); slot.dataset.feedEmbed = ''; slot.setAttribute('aria-live', 'polite');
-    slot.append(create('p', 'feed-embed-note', row.text ? 'Original post and media are available below.' : 'The original post loads here automatically.'));
-    item.append(slot);
-    const actions = create('div', 'feed-actions card-actions');
-    const detail = create('a', 'detail-link', 'View post'); detail.href = row.permalink;
-    const original = create('a', '', 'Original ↗'); original.href = row.original_url; original.target = '_blank'; original.rel = 'noopener noreferrer';
-    const embedButton = create('button', '', 'Load original'); embedButton.type = 'button'; embedButton.dataset.feedAction = 'embed';
-    actions.append(detail, original, embedButton); item.append(actions);
-    return item;
+    } else meta.append(create('span', 'feed-likes', 'Likes unavailable'));
+    return meta;
   }
 
-  function clearSlot(state, message) {
-    state.slot.replaceChildren();
-    const p = create('p', 'feed-embed-note', message + ' ');
-    const link = create('a', '', 'Open original ↗'); link.href = state.row.original_url; link.target = '_blank'; link.rel = 'noopener noreferrer';
-    p.append(link); state.slot.append(p);
+  function textLink(row) {
+    const link = create('a', 'feed-text-link detail-link'); link.href = row.permalink;
+    const hasText = typeof row.text === 'string' && row.text.trim().length > 0;
+    const body = create('p', 'feed-text feed-text-body' + (hasText ? '' : ' feed-text-unavailable'), hasText ? row.text : 'Source text unavailable. Open the post to view the original.');
+    body.setAttribute('dir', 'auto');
+    link.append(body, create('span', 'feed-read-more', 'View post →'));
+    return link;
   }
+
+  function textNote(row) {
+    const hasText = typeof row.text === 'string' && row.text.trim().length > 0;
+    const status = row.text_status || 'unavailable';
+    let message = !hasText ? 'Source text unavailable.' : status.includes('description') ? 'Official original-page description; not a full post transcript.' : status.includes('partial') || status.includes('truncated') ? 'Partial source text; the original may contain more.' : 'Captured source text.';
+    if (hasText && (row.text_truncated || row.truncated)) message += ' Preview shortened to 800 characters. Open the post for the complete captured text.';
+    const note = create('p', 'feed-text-note', message); note.dataset.textStatus = status;
+    return note;
+  }
+
+  function enforceTextOnly(card, row) {
+    for (const node of card.querySelectorAll('.feed-embed, [data-feed-embed], .embed-slot, iframe, .twitter-tweet, .fb-post, .instagram-media, .threads-post, [data-feed-action="embed"], script[src]')) node.remove();
+    const oldLink = card.querySelector('.feed-text-link');
+    const meta = card.querySelector('.feed-meta') || recordMeta(row);
+    if (oldLink?.contains(meta)) card.insertBefore(meta, oldLink);
+    else if (!card.contains(meta)) card.insertBefore(meta, card.children[0] || null);
+    for (const node of card.querySelectorAll('.feed-text-link, .feed-text, .feed-text-body, .feed-text-note')) node.remove();
+    const link = textLink(row); const actions = card.querySelector('.feed-actions') || card.querySelector('.card-actions');
+    if (actions && actions.parentNode === card) card.insertBefore(link, actions); else card.append(link);
+    const note = textNote(row);
+    if (actions && actions.parentNode === card) card.insertBefore(note, actions); else card.append(note);
+  }
+
   function timed(promise, milliseconds, message, onTimeout) {
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => { onTimeout?.(); reject(new Error(message)); }, milliseconds);
       Promise.resolve(promise).then(value => { clearTimeout(timer); resolve(value); }, error => { clearTimeout(timer); reject(error); });
     });
   }
-  function loadX() {
-    if (window.twttr?.widgets?.createTweet) return Promise.resolve(window.twttr);
-    if (scriptPromise) return scriptPromise;
-    scriptPromise = new Promise((resolve, reject) => {
-      window.twttr = window.twttr || {_e: []};
-      if (typeof window.twttr.ready !== 'function') window.twttr.ready = function(callback) { (this._e ||= []).push(callback); };
-      let script = document.querySelector('script[src="https://platform.twitter.com/widgets.js"]');
-      let settled = false, createdScript = false;
-      const fail = error => {
-        if (settled) return; settled = true; clearTimeout(timer); scriptPromise = null;
-        if (createdScript) script?.remove();
-        reject(error);
-      };
-      const succeed = () => {
-        if (settled || !window.twttr?.widgets?.createTweet) return;
-        settled = true; clearTimeout(timer); resolve(window.twttr);
-      };
-      const ready = () => { if (window.twttr?.widgets?.createTweet) succeed(); else window.twttr.ready(succeed); };
-      const timer = setTimeout(() => fail(new Error('X embed timed out')), 15000);
-      const complete = () => ready();
-      if (!script) {
-        script = create('script'); createdScript = true; script.src = 'https://platform.twitter.com/widgets.js'; script.async = true;
-        script.addEventListener('load', complete, {once: true});
-        script.addEventListener('error', () => fail(new Error('X embed blocked')), {once: true});
-        document.head.append(script);
-      } else { window.twttr.ready(ready); }
-    });
-    return scriptPromise;
-  }
-
-  function frameURL(row) {
-    const original = originalURL(row);
-    if (row.platform === 'facebook') {
-      const u = new URL('https://www.facebook.com/plugins/post.php');
-      u.searchParams.set('href', original.href); u.searchParams.set('show_text', 'true'); u.searchParams.set('width', '500'); return u.href;
-    }
-    if (row.platform === 'threads') {
-      const match = original.pathname.match(/^\/@([^/]+)\/post\/([A-Za-z0-9_-]+)\/?$/);
-      if (!match) throw new Error('Unsupported Threads permalink');
-      return 'https://www.threads.com/@' + encodeURIComponent(match[1]) + '/post/' + encodeURIComponent(match[2]) + '/embed';
-    }
-    if (row.platform === 'instagram') {
-      const match = original.pathname.match(/^\/(p|reel)\/([A-Za-z0-9_-]+)\/?$/);
-      if (!match) throw new Error('Unsupported Instagram permalink');
-      return 'https://www.instagram.com/' + match[1] + '/' + encodeURIComponent(match[2]) + '/embed/';
-    }
-    if (row.platform === 'truth') {
-      const match = original.pathname.match(/^\/@([A-Za-z0-9_.-]+)\/(?:posts\/)?(\d+)\/?$/);
-      if (!match) throw new Error('Unsupported Truth Social permalink');
-      return 'https://truthsocial.com/@' + encodeURIComponent(match[1]) + '/' + match[2] + '/embed';
-    }
-    throw new Error('Unsupported embedded platform');
-  }
-
-  async function displayEmbed(card) {
-    const state = states.get(card);
-    if (!state || state.status === 'loaded' || state.status === 'loading') return;
-    if (!production) { state.status = 'local'; clearSlot(state, 'External embeds are disabled in local preview.'); return; }
-    state.status = 'loading'; state.slot.setAttribute('aria-busy', 'true'); clearSlot(state, 'Loading original post…');
-    const button = card.querySelector('[data-feed-action="embed"]'); if (button) button.disabled = true;
-    try {
-      if (state.row.platform === 'x') {
-        const twitter = await timed(loadX(), 16000, 'X script unavailable');
-        state.slot.replaceChildren();
-        const attemptSlot = create('div', 'feed-x-attempt'); state.slot.append(attemptSlot);
-        const frame = await timed(twitter.widgets.createTweet(state.row.post_id, attemptSlot, {conversation: 'none', dnt: true, align: 'center'}), 20000, 'Post display timed out');
-        if (!frame) throw new Error('Post unavailable');
-      } else {
-        const frame = create('iframe'); frame.title = 'Original ' + platformNames[state.row.platform] + ' post'; frame.loading = 'lazy'; frame.referrerPolicy = 'strict-origin-when-cross-origin';
-        frame.setAttribute('allow', 'encrypted-media; picture-in-picture'); frame.src = frameURL(state.row);
-        await timed(new Promise((resolve, reject) => {
-          frame.addEventListener('load', resolve, {once: true}); frame.addEventListener('error', () => reject(new Error('Post display failed')), {once: true});
-          state.slot.replaceChildren(frame);
-        }), 25000, 'Post display timed out');
-      }
-      state.status = 'loaded'; if (button) button.textContent = 'Original loaded';
-    } catch { state.status = 'failed'; clearSlot(state, 'The platform could not display this post here.'); if (button) button.textContent = 'Retry original'; }
-    finally { state.slot.removeAttribute('aria-busy'); if (button) button.disabled = false; }
-  }
-  function runEmbedQueue() {
-    while (embedWorkers < 3 && pendingEmbeds.length) {
-      const card = pendingEmbeds.shift();
-      if (!card.isConnected) continue;
-      embedWorkers++;
-      Promise.resolve(displayEmbed(card)).finally(() => { embedWorkers--; runEmbedQueue(); });
-    }
-  }
-  function queueEmbed(card, manual = false) {
-    const state = states.get(card);
-    if (!state || (!manual && ['failed', 'local'].includes(state.status)) || ['queued', 'loaded', 'loading'].includes(state.status)) return;
-    if (!manual && state.row.text) return;
-    state.status = 'queued'; pendingEmbeds.push(card); runEmbedQueue();
-  }
-  function nearViewport(element) {
-    if (!element?.isConnected) return false;
-    const rect = element.getBoundingClientRect();
-    return rect.top < (window.innerHeight || 900) + 600 && rect.bottom > -200;
-  }
-  function observeCard(card) {
-    if (config.autoEmbeds === false) return;
-    if (!production) { displayEmbed(card); return; }
-    if (observer) observer.observe(card); else if (nearViewport(card)) queueEmbed(card);
-  }
-
   function hydrate(root = document) {
+    if (!listTextOnly) return;
     const cards = [];
     if (root.nodeType === 1 && root.matches?.('.feed-record')) cards.push(root);
     if (root.querySelectorAll) cards.push(...root.querySelectorAll('.feed-record'));
@@ -280,16 +211,9 @@
         const row = validateRecord(JSON.parse(data.textContent));
         if (card.dataset.feedId !== row.id) throw new Error('Record identity mismatch');
         if (dedupe && seen.has(row.id)) { card.remove(); continue; }
-        let slot = card.querySelector('[data-feed-embed], .feed-embed');
-        if (!slot) { slot = create('div', 'feed-embed'); slot.dataset.feedEmbed = ''; card.append(slot); }
-        if (!card.querySelector('[data-feed-action="embed"]')) {
-          let actions = card.querySelector('.feed-actions');
-          if (!actions) { actions = create('div', 'feed-actions'); card.append(actions); }
-          const button = create('button', '', 'Load original'); button.type = 'button'; button.dataset.feedAction = 'embed'; actions.append(button);
-        }
-        registered.add(card); states.set(card, {row, slot, status: 'idle'}); if (!observer) activeCards.add(card);
+        if (listTextOnly) enforceTextOnly(card, row);
+        registered.add(card); states.set(card, {row, status: listTextOnly ? 'text-only' : 'detail-owned'});
         if (dedupe) seen.add(row.id);
-        observeCard(card);
       } catch { card.remove(); say('An invalid post record was skipped.'); }
     }
     if (latest) {
@@ -317,7 +241,7 @@
     try {
       const url = safeFeedURL(current);
       if (visitedPages.has(url.href) || pageNumber(url) !== lastPage + 1) throw new Error('Repeated feed page');
-      const response = await fetch(url.href, {credentials: 'same-origin', headers: {Accept: 'text/html'}, ...(controller ? {signal: controller.signal} : {})});
+      const response = await fetch(url.href, {credentials: 'same-origin', cache: 'no-store', headers: {Accept: 'text/html'}, ...(controller ? {signal: controller.signal} : {})});
       if (!response.ok || (response.url && safeFeedURL(response.url).href !== url.href)) throw new Error('Feed response unavailable');
       const type = response.headers?.get?.('Content-Type'); if (type && !type.toLowerCase().includes('text/html')) throw new Error('Unexpected feed content');
       const page = parseFeedPage(await response.text(), url.href);
@@ -413,7 +337,7 @@
         const url = archiveURL(config.archiveMenuUrl);
         const controller = typeof AbortController === 'function' ? new AbortController() : null;
         const request = (async () => {
-          const response = await fetch(url.href, {credentials: 'same-origin', headers: {Accept: 'text/html'}, ...(controller ? {signal: controller.signal} : {})});
+          const response = await fetch(url.href, {credentials: 'same-origin', cache: 'no-store', headers: {Accept: 'text/html'}, ...(controller ? {signal: controller.signal} : {})});
           if (!response.ok || (response.url && archiveURL(response.url).href !== url.href)) throw new Error('Archive menu unavailable');
           return await response.text();
         })();
@@ -467,8 +391,7 @@
 
   document.addEventListener('click', event => {
     const button = event.target.closest?.('[data-feed-action]');
-    if (button?.dataset.feedAction === 'embed') { const card = button.closest('.feed-record'); if (card) queueEmbed(card, true); }
-    else if (button?.dataset.feedAction === 'archive-open') { event.preventDefault(); openArchive(); }
+    if (button?.dataset.feedAction === 'archive-open') { event.preventDefault(); openArchive(); }
     else if (button?.dataset.feedAction === 'archive-retry') { event.preventDefault(); loadArchiveMenu(); }
     else {
       const link = event.target.closest?.('a[href]');
@@ -488,7 +411,6 @@
     observer = new IntersectionObserver(entries => {
       for (const entry of entries) if (entry.isIntersecting) {
         if (entry.target === sentinel) loadMore(false);
-        else { observer.unobserve(entry.target); queueEmbed(entry.target); }
       }
     }, {rootMargin: '600px 0px'});
   }
@@ -501,8 +423,10 @@
   if (observer && sentinel && nextURL) observer.observe(sentinel);
   function checkVisible() {
     scrollTick = false;
-    for (const card of activeCards) { if (!card.isConnected) activeCards.delete(card); else if (nearViewport(card)) queueEmbed(card); }
-    if (sentinel && nearViewport(sentinel)) loadMore(false);
+    if (sentinel?.isConnected) {
+      const rect = sentinel.getBoundingClientRect();
+      if (rect.top < (window.innerHeight || 900) + 600 && rect.bottom > -200) loadMore(false);
+    }
   }
   if (!observer) window.addEventListener('scroll', () => {
     if (scrollTick) return; scrollTick = true;
@@ -513,7 +437,7 @@
       for (const node of change.removedNodes || []) if (node.nodeType === 1 && !node.isConnected) {
         const cards = node.matches?.('.feed-record') ? [node] : [];
         cards.push(...(node.querySelectorAll?.('.feed-record') || []));
-        for (const card of cards) { observer?.unobserve(card); activeCards.delete(card); }
+        for (const card of cards) observer?.unobserve(card);
       }
       for (const node of change.addedNodes) if (node.nodeType === 1) hydrate(node);
     }

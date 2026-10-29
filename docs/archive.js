@@ -43,15 +43,9 @@
   }catch{slot.dataset.loaded='false';fallback(slot,row,'This platform could not display the post here.');}
  }
  function card(row){
-  if(window.SaysFeed?.createCard)return window.SaysFeed.createCard(row);
-
-  const item=create('li','archive-record');item.dataset.postId=row.id;
-  const top=create('div','card-top');const time=create('time','',row.published_date+' · '+(row.published_at?row.published_at.slice(11,19)+' UTC':'Time not provided'));time.dateTime=row.published_at||row.published_date;
-  top.append(time,create('span','platform',({x:'X / Twitter',facebook:'Facebook',threads:'Threads',instagram:'Instagram'})[row.platform]));
-  const actions=create('div','card-actions');const detail=create('a','detail-link','View post →');detail.href=config.base+'posts/'+row.id+'.html';
-  const button=create('button','','Load original post');button.dataset.action='preview';button.dataset.id=row.id;
-  const original=create('a','','Original ↗');original.href=safeUrl(row).href;original.target='_blank';original.rel='noopener noreferrer';
-  actions.append(detail,button,original);const slot=create('div','embed-slot');slot.id='embed-'+row.id;slot.hidden=true;item.append(top,actions,slot);return item;
+  safeUrl(row);
+  if(!window.SaysFeed?.createCard)throw new Error('Text feed unavailable');
+  return window.SaysFeed.createCard(row);
  }
  function sample(rows,count){
   const copy=rows.slice();for(let i=copy.length-1;i>0;i--){const random=new Uint32Array(1);crypto.getRandomValues(random);const j=random[0]%(i+1);[copy[i],copy[j]]=[copy[j],copy[i]];}
@@ -73,7 +67,7 @@
    if(action==='preview'){const row=records.get(button.dataset.id);if(row)await embed(row,document.getElementById('embed-'+row.id));}
    else if(action==='shuffle'){
     const error=document.querySelector('#load-error');error.hidden=true;
-    if(!monthData){const response=await fetch(config.monthData,{credentials:'same-origin'});if(!response.ok)throw new Error('Month unavailable');const data=await response.json();if(!Array.isArray(data)||!data.every(row=>row.published_date.startsWith(config.month)&&row.text===null))throw new Error('Invalid month data');data.forEach(safeUrl);monthData=data;data.forEach(row=>records.set(row.id,row));}
+    if(!monthData){const canonical=new URL(config.origin);const request=new URL(config.monthData,config.origin);if(canonical.protocol!=='https:'||canonical.hostname!=='nanalab.kr'||canonical.username||canonical.password||canonical.search||canonical.hash||canonical.pathname.replace(/\/$/,'')+'/'!==config.base||request.origin!==canonical.origin||request.username||request.password||request.hash||!request.pathname.startsWith(config.base+'data/'))throw new Error('Invalid month URL');request.searchParams.set('v','text-first-20261029');const response=await fetch(request.pathname+request.search,{credentials:'same-origin',cache:'no-store'});if(!response.ok)throw new Error('Month unavailable');const data=await response.json();if(!Array.isArray(data)||!data.every(row=>row.published_date.startsWith(config.month)&&(row.text===null||typeof row.text==='string'&&Array.from(row.text).length<=800)&&typeof row.text_status==='string'&&typeof row.text_truncated==='boolean'&&(row.text_source===null||typeof row.text_source==='string'&&(()=>{try{const source=new URL(row.text_source);return source.protocol==='https:'&&!source.username&&!source.password;}catch{return false;}})())))throw new Error('Invalid month data');data.forEach(safeUrl);monthData=data;data.forEach(row=>records.set(row.id,row));}
     document.querySelector('#records').replaceChildren(...sample(monthData,50).map(card));window.SaysFeed?.hydrate(document.querySelector('#records'));notify('New random sample loaded.');
    }else if(action==='copy'||action==='share'){
     const url=new URL(button.dataset.url);if(url.origin!==new URL(config.origin).origin||!url.href.startsWith(config.origin+'/posts/'))throw new Error('Invalid share URL');

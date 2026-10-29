@@ -17,5 +17,22 @@
   "latest_order_and_unique": true,
   "archive_menu_every_page": true,
   "portrait_verified": true,
-  "public_uncleared_bodies": false
+  "original_metadata_text_still_null": true,
+  "text_overlay_sha256_verified": true,
+  "text_first_ssr_every_list": true,
+  "preview_limit_codepoints": 800,
+  "preview_metadata_independently_matched": true,
+  "full_text_independently_matched": true,
+  "html_escaping_verified": true,
+  "full_text_pages": 1128,
+  "detail_fallback_pages": 553,
+  "list_records_checked": 5063,
+  "list_fallbacks_checked": 1660,
+  "truncated_previews_checked": 0,
+  "list_embeds_absent": true,
+  "detail_embeds_preserved": true,
+  "text_overlay_records": 1128,
+  "text_overlay_missing_records": 553,
+  "read_workers": 32,
+  "rights_boundary": "Exact captured source text is verified; this checker does not independently establish copyright permission or source-display completeness."
 }

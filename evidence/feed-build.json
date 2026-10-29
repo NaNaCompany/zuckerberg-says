@@ -1694,5 +1694,8 @@
   "home_latest_count": 20,
   "duplicate_popular_latest": false,
   "like_policy": "Known source snapshot integers only; null is not zero. Ties use newest collected time.",
-  "body_policy": "Original platform embeds load automatically. Uncleared post bodies are not redistributed. Separate local TXT archive is outside the public repository."
+  "body_policy": "Text-first lists show up to 800 original-language source codepoints. Detail pages contain the captured source text plus the original platform embed. Missing, partial and official-description statuses remain explicit. No translated or reconstructed source text is added.",
+  "list_text_only": true,
+  "auto_embeds": false,
+  "preview_codepoints": 800
 }
