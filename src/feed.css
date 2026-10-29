@@ -36,7 +36,7 @@ body{padding-bottom:calc(170px + env(safe-area-inset-bottom,0px))}
 #feed-next[aria-disabled="true"]{opacity:.6;pointer-events:none}
 #feed-status{font-size:12px;text-align:center;line-height:1.7;color:#6f7d62;min-height:22px;padding:6px 0}
 #feed-sentinel{height:2px}
-#archive-toggle{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(180px + env(safe-area-inset-bottom,0px));z-index:2147483000;min-width:58px;min-height:48px;border:1px solid #748669;border-radius:8px;background:#34412f;color:#fff;padding:12px 15px;box-shadow:0 3px 15px #23321930;font-size:13px;cursor:pointer}
+#archive-toggle{position:fixed;right:max(16px,env(safe-area-inset-right,0px));top:40%;bottom:auto;z-index:2147483000;min-width:58px;min-height:48px;border:1px solid #748669;border-radius:8px;background:#34412f;color:#fff;padding:12px 15px;box-shadow:0 3px 15px #23321930;font-size:13px;cursor:pointer}
 #archive-panel{position:fixed;right:max(14px,env(safe-area-inset-right,0px));top:max(18px,env(safe-area-inset-top,0px));bottom:calc(180px + env(safe-area-inset-bottom,0px));width:min(440px,calc(100vw - 28px));z-index:2147483002;background:#f5f4ee;border:1px solid #b8c5ad;border-radius:9px;padding:20px;overflow:auto;overscroll-behavior:contain;box-shadow:0 5px 30px #19221140}
 #archive-panel .archive-panel-heading,#archive-panel .archive-panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
 #archive-panel h2{font-size:21px;margin:0}
@@ -68,7 +68,7 @@ body{padding-bottom:calc(170px + env(safe-area-inset-bottom,0px))}
  .feed-record .feed-text{font-size:16px;line-height:1.75}
  .feed-embed{min-height:180px}
  .feed-embed iframe{min-height:450px}
- #archive-panel{padding:16px}
+ #archive-panel{padding:16px;top:max(88px,env(safe-area-inset-top,0px));bottom:calc(300px + env(safe-area-inset-bottom,0px));min-height:160px}
  #archive-toggle{font-size:12px;padding:11px 13px}
 }
 @media(min-width:651px) and (max-width:700px){.feed-hero .feed-portrait{flex-basis:88px;min-width:88px}.feed-hero .portrait{width:88px;height:110px}}

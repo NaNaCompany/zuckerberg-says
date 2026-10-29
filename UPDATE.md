@@ -21,3 +21,8 @@
 - Existing detail URLs, original links, UTC/source calendar dates, monthly shuffle and day navigation are preserved. Verified repost-only historical dates keep their existing route with an empty eligible list rather than silently disappearing.
 - Every HTML including feed and archive-menu pages retains GA4, GTM with noscript, AdSense, Cloudflare, a self canonical and More Apps. Publisher and embed requests are disabled on local hosts; the preview CSP also blocks the noscript frame. Bottom spacing and floating-menu offsets leave room for observed mobile ad anchors; third-party ad height may vary.
 - Shared feed runtime regression tests cover HTML pagination, deduplication/order, concurrent loading, errors/retry, unsafe URLs/HTML, lazy embeds, source availability, menu fetching/keyboard/focus, mutation cleanup and unavailable IntersectionObserver. Full static checks validate every generated page and source-backed ranking.
+
+## 2026-10-29 · Expanded mobile anchor navigation fix
+
+- Move the floating Archive button to the right middle of the viewport (40% from the top). On mobile, keep the archive panel controls below top anchors and above expanded bottom anchors. An expanded production advertisement had intercepted the previous bottom button. Publisher integrations and ad settings remain unchanged.
+- Verified locally at 375 × 812: visible menu open/close, month navigation, lazy archive menu and shuffled 50-card content. Only the shared stylesheet and this record changed; source data, generated HTML and the tested feed runtime remain unchanged. Production verification is recorded separately.
